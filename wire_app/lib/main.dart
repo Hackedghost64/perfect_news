@@ -3,12 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'firebase_options.dart';
+import 'services/notification_filter.dart';
 
 // Defensive Programming: This must be a top-level function to run in the background.
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  debugPrint("Handling a background message: ${message.messageId}");
+  
+  if (await NotificationFilter.shouldHandleMessage(message)) {
+    debugPrint("Handling a background message: ${message.messageId}");
+    // You can add logic here to show a local notification if the payload is data-only
+  }
 }
 
 void main() async {
@@ -20,6 +25,15 @@ void main() async {
 
   // Set up the background listener
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Set up foreground listener
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+    if (await NotificationFilter.shouldHandleMessage(message)) {
+      debugPrint("Received a foreground message: ${message.messageId}");
+      // The OS doesn't show notifications when the app is in foreground by default.
+      // Since we don't have flutter_local_notifications, we'll just log it.
+    }
+  });
 
   // Request permission for notifications (Required for iOS/Android 13+)
   FirebaseMessaging messaging = FirebaseMessaging.instance;
