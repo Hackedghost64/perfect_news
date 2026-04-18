@@ -1,0 +1,17 @@
+[
+  {
+    "id": "bbc_world",
+    "name": "BBC World News",
+    "url": "http://feeds.bbci.co.uk/news/world/rss.xml"
+  },
+  {
+    "id": "al_jazeera",
+    "name": "Al Jazeera Breaking",
+    "url": "https://www.aljazeera.com/xml/rss/all.xml"
+  },
+  {
+    "id": "npr_top",
+    "name": "NPR Top Stories",
+    "url": "https://feeds.npr.org/1001/rss.xml"
+  }
+]
