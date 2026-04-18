@@ -1,6 +1,6 @@
 {
-    "name": "wire_app",
-    "short_name": "wire_app",
+    "name": "wire",
+    "short_name": "wire",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
