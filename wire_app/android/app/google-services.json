@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1086146205699",
+    "project_id": "wire-e8870",
+    "storage_bucket": "wire-e8870.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1086146205699:android:5e006d7a4d79112f511636",
+        "android_client_info": {
+          "package_name": "com.example.wire_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKwDbDfqIre9GJ4rMcsvnmgWVDghdrJpw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

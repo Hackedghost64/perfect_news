@@ -37,9 +37,9 @@ dependencies:
   firebase_core: ^4.7.0
   firebase_messaging: ^16.2.0
   http: ^1.6.0
-  url_launcher: ^6.3.2
   xml: ^6.6.1
   shared_preferences: ^2.5.5
+  webview_flutter: ^4.13.1
 
 dev_dependencies:
   flutter_test:

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../controllers/feed_controller.dart';
 import '../models/article.dart';
+import 'reader_view.dart'; // INJECTED: The new brutalist reader
 
 class NewsFeedView extends StatefulWidget {
   const NewsFeedView({super.key});
@@ -80,13 +80,15 @@ class ArticleCard extends StatelessWidget {
 
   const ArticleCard({super.key, required this.article});
 
-  Future<void> _launchUrl() async {
-    final uri = Uri.parse(article.url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.inAppWebView);
-    } else {
-      debugPrint("WARN: Cannot launch URL ${article.url}");
-    }
+  // UPDATED: Routes to our hostile CSS injected WebView instead of external browser
+  void _openReader(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            ReaderView(url: article.url, sourceName: article.source),
+      ),
+    );
   }
 
   @override
@@ -146,7 +148,7 @@ class ArticleCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 OutlinedButton(
-                  onPressed: _launchUrl,
+                  onPressed: () => _openReader(context), // UPDATED
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.white30),
                     foregroundColor: Colors.white,
