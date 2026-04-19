@@ -73,7 +73,9 @@ class RSSManager:
                             new_articles.append({
                                 'title': entry.title,
                                 'source': source['name'],
-                                'url': entry.link
+                                'url': entry.link,
+                                'region': source.get('region', 'world'),
+                                'language': source.get('language', 'en')
                             })
             except Exception as e:
                 logging.error(f"Failed to fetch {source['name']}: {str(e)}")
@@ -95,21 +97,27 @@ class NotificationDispatcher:
             logging.error(f"Failed to parse Firebase credentials: {str(e)}")
             assert False, "Firebase init failed."
 
-    def broadcast(self, article):
-        # We broadcast to a single FCM topic (e.g., 'breaking_news') 
-        # that all Flutter app installations will subscribe to.
+    def broadcast(self, article, region, language):
+        # Broadcast to a specific topic based on region and language
+        # Also broadcast to 'breaking_news' for backward compatibility or global alerts
+        topic = f"news_{region}_{language}"
+        
         message = messaging.Message(
             notification=messaging.Notification(
                 title=f"WIRE: {article['source']}",
                 body=article['title'],
             ),
-            topic='breaking_news',
+            data={
+                "url": article['url'],
+                "source": article['source'],
+            },
+            topic=topic,
         )
         try:
             response = messaging.send(message)
-            logging.info(f"FCM Push Success: {response} - {article['title']}")
+            logging.info(f"FCM Push Success to {topic}: {response} - {article['title']}")
         except Exception as e:
-            logging.error(f"FCM Push Failed: {str(e)}")
+            logging.error(f"FCM Push Failed to {topic}: {str(e)}")
 
 # ---------------------------------------------------------
 # Execution (Main Logic Flow)
@@ -132,7 +140,7 @@ if __name__ == "__main__":
         
         # To avoid spamming, only send the top 3 newest articles max in one run
         for article in new_articles[:3]:
-            dispatcher.broadcast(article)
+            dispatcher.broadcast(article, article['region'], article['language'])
     else:
         logging.info("No new articles found.")
         

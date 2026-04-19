@@ -16,59 +16,112 @@ class _NewsFeedViewState extends State<NewsFeedView> {
   @override
   void initState() {
     super.initState();
-    _controller.syncFeed();
+    // FeedController handles its own initialization via _loadSettings
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'WIRE',
-          style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 4.0),
-        ),
-        backgroundColor: Colors.black,
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.sync, color: Colors.white),
-            onPressed: _controller.syncFeed,
-          ),
-        ],
-      ),
-      body: ListenableBuilder(
-        listenable: _controller,
-        builder: (context, _) {
-          if (_controller.isLoading && _controller.articles.isEmpty) {
-            return const Center(
-              child: Text(
-                "SYNCING WIRES...",
-                style: TextStyle(letterSpacing: 2.0),
-              ),
-            );
-          }
-
-          if (_controller.errorMessage != null &&
-              _controller.articles.isEmpty) {
-            return Center(
-              child: Text(
-                _controller.errorMessage!,
-                style: const TextStyle(color: Colors.redAccent),
-              ),
-            );
-          }
-
-          return RefreshIndicator(
-            color: Colors.white,
-            backgroundColor: Colors.black,
-            onRefresh: _controller.syncFeed,
-            child: ListView.builder(
-              itemCount: _controller.articles.length,
-              itemBuilder: (context, index) {
-                return ArticleCard(article: _controller.articles[index]);
-              },
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (context, _) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text(
+              'WIRE',
+              style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 4.0),
             ),
-          );
+            backgroundColor: Colors.black,
+            centerTitle: true,
+            actions: [
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.language, color: Colors.white),
+                onSelected: _controller.setLanguage,
+                color: Colors.grey[900],
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'en',
+                    child: Text('ENGLISH', style: TextStyle(color: Colors.white)),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'hi',
+                    child: Text('HINDI', style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ),
+              IconButton(
+                icon: const Icon(Icons.sync, color: Colors.white),
+                onPressed: _controller.syncFeed,
+              ),
+            ],
+          ),
+          body: _buildBody(),
+          bottomNavigationBar: BottomNavigationBar(
+            backgroundColor: Colors.black,
+            selectedItemColor: Colors.white,
+            unselectedItemColor: Colors.grey,
+            currentIndex: _controller.currentRegion == 'world' ? 0 : 1,
+            onTap: (index) {
+              _controller.setRegion(index == 0 ? 'world' : 'india');
+            },
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.public),
+                label: 'WORLD',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.flag),
+                label: 'INDIA',
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBody() {
+    if (_controller.isLoading && _controller.articles.isEmpty) {
+      return const Center(
+        child: Text(
+          "SYNCING WIRES...",
+          style: TextStyle(letterSpacing: 2.0),
+        ),
+      );
+    }
+
+    if (_controller.errorMessage != null && _controller.articles.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              _controller.errorMessage!,
+              style: const TextStyle(color: Colors.redAccent),
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton(
+              onPressed: _controller.syncFeed,
+              child: const Text("RETRY"),
+            )
+          ],
+        ),
+      );
+    }
+
+    if (_controller.articles.isEmpty) {
+      return const Center(
+        child: Text("NO NEWS FOUND."),
+      );
+    }
+
+    return RefreshIndicator(
+      color: Colors.white,
+      backgroundColor: Colors.black,
+      onRefresh: _controller.syncFeed,
+      child: ListView.builder(
+        itemCount: _controller.articles.length,
+        itemBuilder: (context, index) {
+          return ArticleCard(article: _controller.articles[index]);
         },
       ),
     );
