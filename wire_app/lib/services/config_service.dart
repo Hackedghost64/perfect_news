@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
 class ConfigService {
@@ -9,6 +10,16 @@ class ConfigService {
 
   Future<List<Map<String, dynamic>>> fetchSources() async {
     try {
+      // First try to load from local assets for faster development/offline
+      try {
+        final String localData = await rootBundle.loadString('assets/sources.json');
+        final List<dynamic> data = json.decode(localData);
+        debugPrint("Loaded sources from local assets.");
+        return data.cast<Map<String, dynamic>>();
+      } catch (e) {
+        debugPrint("Local sources not found or failed to load: $e");
+      }
+
       final response = await http.get(Uri.parse(_configUrl));
 
       // Defensive Programming: Fail-fast if the repo is unreachable
